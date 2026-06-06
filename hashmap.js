@@ -1,3 +1,5 @@
+// This a function method for hashmap. I struggled with debugging this one.
+
 export function HashMap (defaultCapacity = 16) {
     // Variables for functions
     let capacity = defaultCapacity;
@@ -27,52 +29,47 @@ export function HashMap (defaultCapacity = 16) {
         // Take two arguments: the first is a key, and the second is a value that is assigned to this key.
         const hashedKey = hash(key);
         const index  = hash(key) % capacity;
-        let linkList = buckets[hashedKey];
-
-        if (key === "hat") {
-            console.log("hat", hashedKey);
-        }
+        let linkList = buckets[index];
 
         if (linkList) {
-            const keyNode = linkList.find(key);
+            const keyNode = linkList.find(entry => entry.key === key);
 
             if (keyNode) {
-                keyNode.value = value;
+                keyNode[1] = value;
             } else {
-                linkList.append(key, value);
+                linkList.push({key, value});
             }
         } else {
-            buckets[hashedKey] = [];
-            buckets[hashedKey].push({key, value});
+            buckets[index] = [];
+            buckets[index].push({key, value});
         }
     }
 
     function get(key) {
         // Take one argument as a key and return the value that is assigned to this key. If a key is not found, return null
         const hashedKey = hash(key);
-        if (key === "hat") {
-            console.log("hat", hashedKey);
-        }
+        const index  = hash(key) % capacity;
 
-        const linkList = buckets[hashedKey];
+        let linkList = buckets[index];
 
         if (!linkList) {
             return null;
         }
 
-        const keyNode = linkList.find(key);
+        const keyNode = linkList.find( entry => entry[0]=== key);
 
         if (!keyNode) {
             return null;
         }
 
-        return keyNode.value;
+        return keyNode[1];
     }
 
     function has(key) {
         // Take a key as an argument and return true or false based on whether or not the key is in the hash map.
         const hashedKey = hash(key);
-        const linkList = buckets[hashedKey];
+        const index  = hash(key) % capacity;
+        let linkList = buckets[index];
 
         if (!linkList) {
             return false;
@@ -106,9 +103,9 @@ export function HashMap (defaultCapacity = 16) {
         let mapLength = 0;
 
         buckets.forEach((linkList) => {
-            if(!buckets) return null;
+            if(!linkList) return;
 
-            mapLength += buckets.length;
+            mapLength += linkList.length;
         });
         return mapLength;
     }
@@ -124,17 +121,11 @@ export function HashMap (defaultCapacity = 16) {
         let entryKeys = [];
 
         buckets.forEach((linkList) => {
-            let head = linkList.head;
+            if (!linkList) return;
 
-            if (head) {
-                let currNode = head;
-
-                while (currNode) {
-                    entryKeys.push(currNode.key);
-
-                    currNode = currNode.nextNode;
-                }
-            }
+            linkList.forEach((entry) => {
+                entryKeys.push(entry[0]);
+            });
 
         });
 
@@ -146,17 +137,11 @@ export function HashMap (defaultCapacity = 16) {
         let entryValues = [];
 
         buckets.forEach((linkList) => {
-            let head = linkList.head;
+            if (!linkList) return;
 
-            if (head) {
-                let currNode = head;
-
-                while (currNode) {
-                    entryValues.push(currNode.value);
-
-                    currNode = currNode.nextNode;
-                }
-            }
+            linkList.forEach((entry) => {
+                entryValues.push(entry[0]);
+            });
 
         });
         return entryValues;
@@ -207,3 +192,38 @@ myHashMap.set('kite', 'pink');
 myHashMap.set('lion', 'golden');
 
 console.log(myHashMap.length());
+
+console.log("FINISHED");
+
+// 3. Check your levels! Your map should have exactly 12 items.
+// 12 items / 16 capacity = 0.75 (Right at the load factor limit!)
+console.log("Current Length:", myHashMap.length()); // Should log 12
+console.log("Current Capacity:", myHashMap.capacity); // Should log 16
+
+// 4. Test overwriting nodes (the "Carlos" update scenario)
+// This should change the values but NOT add new items or trigger growth.
+myHashMap.set('apple', 'bright red');
+myHashMap.set('banana', 'ripe yellow');
+console.log("Length after updates:", myHashMap.length()); // Should STILL be 12
+console.log("Updated Apple:", myHashMap.get('apple')); // Should log 'bright red'
+
+// 5. The Moment of Truth: Add the 13th item ('moon')
+// This pushes the load level over 0.75, which should trigger your growth logic!
+myHashMap.set('moon', 'silver');
+
+console.log("--- AFTER GROWTH ---");
+console.log("New Capacity:", myHashMap.capacity); // Should successfully log 32!
+console.log("New Length:", myHashMap.length()); // Should log 13
+console.log("Can still find old data? (grape):", myHashMap.get('grape')); // Should log 'purple'
+
+// 6. Test the remaining methods to make sure nothing broke during rehashing
+console.log("Has 'dog'?:", myHashMap.has('dog')); // Should log true
+console.log("Has 'cat'?:", myHashMap.has('cat')); // Should log false
+
+console.log("Removing 'hat'...", myHashMap.remove('hat')); // Should log true
+console.log("Has 'hat' now?:", myHashMap.has('hat')); // Should log false
+console.log("Length after removal:", myHashMap.length()); // Should log 12
+
+console.log("All current keys:", myHashMap.keys());
+console.log("All current values:", myHashMap.values());
+console.log("All entries:", myHashMap.entries());
