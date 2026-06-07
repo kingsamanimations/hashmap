@@ -155,36 +155,3 @@ test.set('ice cream', 'white');
 test.set('jacket', 'blue');
 test.set('kite', 'pink');
 test.set('lion', 'golden');
-
-// 3. Check your levels! Your map should have exactly 12 items.
-// 12 items / 16 capacity = 0.75 (Right at the load factor limit!)
-console.log("Current Length:", test.length()); // Should log 12
-console.log("Current Capacity:", test.capacity); // Should log 16
-
-// 4. Test overwriting nodes (the "Carlos" update scenario)
-// This should change the values but NOT add new items or trigger growth.
-test.set('apple', 'bright red');
-test.set('banana', 'ripe yellow');
-console.log("Length after updates:", test.length()); // Should STILL be 12
-console.log("Updated Apple:", test.get('apple')); // Should log 'bright red'
-
-// 5. The Moment of Truth: Add the 13th item ('moon')
-// This pushes the load level over 0.75, which should trigger your growth logic!
-test.set('moon', 'silver');
-
-console.log("--- AFTER GROWTH ---");
-console.log("New Capacity:", test.capacity); // Should successfully log 32!
-console.log("New Length:", test.length()); // Should log 13
-console.log("Can still find old data? (grape):", test.get('grape')); // Should log 'purple'
-
-// 6. Test the remaining methods to make sure nothing broke during rehashing
-console.log("Has 'dog'?:", test.has('dog')); // Should log true
-console.log("Has 'cat'?:", test.has('cat')); // Should log false
-
-console.log("Removing 'hat'...", test.remove('hat')); // Should log true
-console.log("Has 'hat' now?:", test.has('hat')); // Should log false
-console.log("Length after removal:", test.length()); // Should log 12
-
-console.log("All current keys:", test.keys());
-console.log("All current values:", test.values());
-console.log("All entries:", test.entries());

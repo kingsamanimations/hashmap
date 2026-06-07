@@ -1,17 +1,26 @@
 // This a function method for hashmap. I struggled with debugging this one.
 
 export function HashMap (defaultCapacity = 16) {
+    console.log("created");
+    console.log("constructor ran");
     // Variables for functions
-    let capacity = defaultCapacity;
     const loadFactor = 0.75;
-    let buckets = new Array(defaultCapacity);
 
     // Attach a set method
     this.set = set;
 
+    let capacity = defaultCapacity;
+
+    function getCapacity() {
+        console.log("Capacity Called");
+        return capacity;
+    };
+
     function currentCapacity() {
         return capacity;
     }
+
+    let buckets = new Array(capacity);
 
     function hash(key) {
     // Take  a key and produce a hash code with it. 
@@ -35,7 +44,7 @@ export function HashMap (defaultCapacity = 16) {
             const keyNode = linkList.find(entry => entry.key === key);
 
             if (keyNode) {
-                keyNode[1] = value;
+                keyNode.value = value;
             } else {
                 linkList.push({key, value});
             }
@@ -47,7 +56,6 @@ export function HashMap (defaultCapacity = 16) {
 
     function get(key) {
         // Take one argument as a key and return the value that is assigned to this key. If a key is not found, return null
-        const hashedKey = hash(key);
         const index  = hash(key) % capacity;
 
         let linkList = buckets[index];
@@ -56,18 +64,17 @@ export function HashMap (defaultCapacity = 16) {
             return null;
         }
 
-        const keyNode = linkList.find( entry => entry[0]=== key);
+        const keyNode = linkList.find( entry => entry.key === key);
 
         if (!keyNode) {
             return null;
         }
 
-        return keyNode[1];
+        return keyNode.value;
     }
 
     function has(key) {
         // Take a key as an argument and return true or false based on whether or not the key is in the hash map.
-        const hashedKey = hash(key);
         const index  = hash(key) % capacity;
         let linkList = buckets[index];
 
@@ -75,27 +82,27 @@ export function HashMap (defaultCapacity = 16) {
             return false;
         }
         
-        if (!linkList.contains(key)) {
-            return false;
-        }
-
-        return true;
+        return linkList.some(entry => entry.key === key);
     }
 
     function remove(key) {
         // Take a key as an argument.
         const index = hash(key) % capacity;
-        const bucket = buckets[index];
+        const linkList = buckets[index];
 
-        if(!bucket) return null
-
-        for (let i = 0; i < bucket.length; i++) {
-            if (bucket[i].key === key) {
-                bucket.splice(i, 1);
-                return true;
-            }
+        if(!linkList){
+            return false;
         }
-        return false;
+
+        const enterIndex = linkList.findIndex(entry => entry.key === key);
+
+        if (enterIndex === 1) {
+            return false;
+        }
+
+        linkList.splice(enterIndex, 1);
+        return true;
+        
     }
 
     function length() {
@@ -124,7 +131,7 @@ export function HashMap (defaultCapacity = 16) {
             if (!linkList) return;
 
             linkList.forEach((entry) => {
-                entryKeys.push(entry[0]);
+                entryKeys.push(entry.key);
             });
 
         });
@@ -140,7 +147,7 @@ export function HashMap (defaultCapacity = 16) {
             if (!linkList) return;
 
             linkList.forEach((entry) => {
-                entryValues.push(entry[0]);
+                entryValues.push(entry.key);
             });
 
         });
@@ -152,11 +159,11 @@ export function HashMap (defaultCapacity = 16) {
         let allEntries = [];
 
         buckets.forEach((linkList) => {
-            if (!bucket) return
+            if (!linkList) return;
 
-            for (let i = 0; i < buckets.length; i++) {
-                allEntries.push(buckets[i].key, buckets[i].value)
-            }
+            linkList.forEach((entry) => {
+                allEntries.push(entry);
+            })
 
         });
         return allEntries;
@@ -172,6 +179,7 @@ export function HashMap (defaultCapacity = 16) {
         keys,
         values,
         entries,
+        getCapacity,
         currentCapacity,
     };
 }
@@ -195,28 +203,24 @@ console.log(myHashMap.length());
 
 console.log("FINISHED");
 
-// 3. Check your levels! Your map should have exactly 12 items.
-// 12 items / 16 capacity = 0.75 (Right at the load factor limit!)
 console.log("Current Length:", myHashMap.length()); // Should log 12
-console.log("Current Capacity:", myHashMap.capacity); // Should log 16
+console.log("Current Capacity:", myHashMap.currentCapacity()); // Should log 16
 
-// 4. Test overwriting nodes (the "Carlos" update scenario)
-// This should change the values but NOT add new items or trigger growth.
+
 myHashMap.set('apple', 'bright red');
 myHashMap.set('banana', 'ripe yellow');
 console.log("Length after updates:", myHashMap.length()); // Should STILL be 12
 console.log("Updated Apple:", myHashMap.get('apple')); // Should log 'bright red'
 
-// 5. The Moment of Truth: Add the 13th item ('moon')
-// This pushes the load level over 0.75, which should trigger your growth logic!
 myHashMap.set('moon', 'silver');
 
 console.log("--- AFTER GROWTH ---");
-console.log("New Capacity:", myHashMap.capacity); // Should successfully log 32!
+console.log("New Capacity:", myHashMap.getCapacity()); // Should successfully log 32!
+console.log("instance created");
 console.log("New Length:", myHashMap.length()); // Should log 13
 console.log("Can still find old data? (grape):", myHashMap.get('grape')); // Should log 'purple'
 
-// 6. Test the remaining methods to make sure nothing broke during rehashing
+
 console.log("Has 'dog'?:", myHashMap.has('dog')); // Should log true
 console.log("Has 'cat'?:", myHashMap.has('cat')); // Should log false
 
