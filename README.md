@@ -1,6 +1,7 @@
 # hashmap
+A data structure that allows you to store key-value pairs.
 
-Hand help from references to make this
+Hand help from referencing other users' works to make this.
 
 # How to test:
 node hashmap.js
